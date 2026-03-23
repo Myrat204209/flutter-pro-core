@@ -4,6 +4,29 @@
 
 A production-ready Flutter template enforcing Clean Architecture, strict package isolation, and BLoC state management. Powered by Dart Workspaces and automated via a robust Makefile workflow.
 
+## 🚀 Getting Started (Using this Template)
+
+1. **Create your repository:** Click the green **"Use this template"** button on GitHub.
+2. **Clone your new repo:** `git clone https://github.com/Myrat204209/flutter-pro-core.git`
+3. **Initialize your brand:** Use the Makefile to rename the app and bundle ID in one command.
+
+   ```Bash
+   make init-project name="My Cool App" bundle="com.mycompany.coolapp"
+   ```
+4. **Update Visuals:**
+    * Replace `assets/icon/app_icon.png` with your 1024x1024 app icon.
+    * Replace `assets/splash/splash_logo.png` with your splash screen logo.
+    * Run the native generation command:
+    ```Bash
+    make gen-native-ui
+    ```
+
+5. **Generate Code & Run:**
+
+```Bash
+make setup
+flutter run
+```
 ## 🏗️ Architecture Overview
 
 This project utilizes **Dart Workspaces** (Dart 3.5+) to manage a multi-package architecture. This enforces a strict separation of concerns. 

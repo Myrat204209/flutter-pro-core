@@ -1,0 +1,5 @@
+flutter_native_splash:
+  color: "#ffffff" # Or your brand color
+  image: "assets/splash/splash_logo.png" # Place a placeholder splash logo here
+  android_12:
+    image: "assets/splash/splash_logo.png"
