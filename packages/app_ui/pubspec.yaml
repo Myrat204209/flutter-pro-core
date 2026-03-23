@@ -1,0 +1,40 @@
+name: app_ui
+description: "App UI Component Library."
+
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  data_provider:
+    path: ../data_provider
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.2.3
+  
+dev_dependencies:
+  build_runner: ^2.11.1
+  flutter_gen_runner: ^5.13.0
+  icon_font_generator: ^4.1.0
+
+flutter:
+  assets:
+    - assets/
+    - assets/images/
+    - path: assets/svg/
+      transformers:
+        - package: vector_graphics_compiler
+
+flutter_gen:
+  assets:
+    enabled: true
+    outputs:
+      directory_path_enabled: true
+      package_parameter_enabled: true
+  output: lib/src/generated/
+  line_length: 80 
+  integrations:
+    image: true
+    flutter_svg: true

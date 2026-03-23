@@ -1,0 +1,8 @@
+# Add this to the root pubspec.yaml
+environment:
+  sdk: ^3.5.0 
+
+workspace:
+  - packages/app_ui
+  - packages/data_provider
+  - packages/form_inputs
