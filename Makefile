@@ -1,26 +1,11 @@
 # ==========================================
 # --- VARIABLES ---
-# Update these paths if your project structure changes
 # ==========================================
-TARGET = lib/main/main.dart
+TARGET = lib/main.dart
 SYMBOLS_DIR = ./build/symbols
 ENV_PROD = APP_ENV=prod
 
-.PHONY: setup icons gen-native-ui gen-assets build-data build-root clean clean-all build-android-apk build-android-aab build-ios-adhoc build-ios-appstore new-branch sync-main
-
-# ==========================================
-# --- 🏗️ 0. BOOTSTRAP NEW PROJECT ---
-# ==========================================
-
-# Run this ONLY ONCE when initializing a fresh repository from this template
-bootstrap:
-	@echo "🚀 Bootstrapping a fresh Flutter Clean Architecture App..."
-	@read -p "Enter Project Name (e.g., my_app): " name; \
-	read -p "Enter Organization ID (e.g., com.mycompany): " org; \
-	read -p "Enter Platforms (comma-separated, e.g., android,ios,web): " platforms; \
-	echo "⏳ Creating Flutter app '$$name' with empty template..."; \
-	flutter create --empty --org "$$org" --project-name "$$name" --platforms "$$platforms" .; \
-	echo "✅ Base app created successfully!"
+.PHONY: setup icons gen-native-ui gen-assets build-data build-root clean clean-all build-android-apk build-android-aab build-ios-adhoc build-ios-appstore new-branch sync-main init-project test analyze
 
 # ==========================================
 # --- 🛠️ 1. SETUP & GENERATION COMMANDS ---
@@ -29,16 +14,11 @@ bootstrap:
 # The Combo Command: Run this when switching branches or starting fresh
 setup:
 	@echo "Starting full project generation across all packages..."
-	$(MAKE) icons
+	flutter pub get
 	$(MAKE) gen-assets
 	$(MAKE) build-data
 	$(MAKE) build-root
 	@echo "🎉 All generation complete! Your project is ready to run."
-
-icons:
-	@echo "Generating Icons(App UI)..."
-	@cd packages/app_ui && dart run icon_font_generator:generator
-	@echo "Icons updated!"
 
 gen-native-ui:
 	@echo "Generating App Icons..."
@@ -49,7 +29,7 @@ gen-native-ui:
 
 gen-assets:
 	@echo "Generating assets via FlutterGen (App UI)..."
-	@cd packages/app_ui && fluttergen -c pubspec.yaml
+	@cd packages/app_ui && dart run flutter_gen_runner
 	@echo "Assets generated!"
 
 build-data:
@@ -58,34 +38,48 @@ build-data:
 	@echo "Data Provider generation complete!"
 
 build-root:
-	@echo "Running build_runner for Root (AutoRouter, Envied)..."
+	@echo "Running build_runner for Root..."
 	dart run build_runner build -d
 	@echo "Root generation complete!"
 
 # ==========================================
-# --- 🧹 2. CLEANING COMMANDS ---
+# --- 🧪 2. TESTING & QUALITY COMMANDS ---
 # ==========================================
 
-# Cleans just the main app folder
+test:
+	@echo "Running tests across workspace..."
+	flutter test
+	@cd packages/app_ui && flutter test
+	@cd packages/data_provider && flutter test
+	@cd packages/form_inputs && flutter test
+	@echo "✅ All tests passed!"
+
+analyze:
+	@echo "Running static analysis across workspace..."
+	flutter analyze
+	@echo "✅ Static analysis passed!"
+
+# ==========================================
+# --- 🧹 3. CLEANING COMMANDS ---
+# ==========================================
+
 clean:
 	@echo "Cleaning root project..."
 	flutter clean
 	flutter pub get
 	@echo "Clean complete!"
 
-# The Combo Clean: Travels through packages and cleans everything
 clean-all:
 	@echo "Deep cleaning the entire workspace..."
-	@echo "Cleaning Root..."
-	flutter clean && flutter pub get
-	@echo "Cleaning App UI..."
-	@cd packages/app_ui && flutter clean && flutter pub get
-	@echo "Cleaning Data Provider..."
-	@cd packages/data_provider && flutter clean && flutter pub get
+	flutter clean
+	@cd packages/app_ui && flutter clean
+	@cd packages/data_provider && flutter clean
+	@cd packages/form_inputs && flutter clean
+	flutter pub get
 	@echo "✨ Deep clean finished! Run 'make setup' to regenerate files."
 
 # ==========================================
-# --- 🚀 3. RELEASE BUILD COMMANDS ---
+# --- 🚀 4. RELEASE BUILD COMMANDS ---
 # ==========================================
 
 build-android-apk:
@@ -109,10 +103,9 @@ build-ios-appstore:
 	@echo "iOS App Store build ready! Ready for Apple Transporter."
 
 # ==========================================
-# --- 🌿 4. GIT WORKFLOW COMMANDS ---
+# --- 🌿 5. GIT WORKFLOW COMMANDS ---
 # ==========================================
 
-# Usage: make new-branch b=feature/my-awesome-feature
 new-branch:
 	@if [ -z "$(b)" ]; then echo "❌ Error: Provide a branch name using 'make new-branch b=branch_name'"; exit 1; fi
 	@echo "Creating and switching to branch: $(b)"
@@ -128,22 +121,21 @@ sync-main:
 	@echo "✅ Main is synced and up to date!"
 
 # ==========================================
-# --- 🏗️ 5. TEMPLATE INITIALIZATION ---
+# --- 🏗️ 6. TEMPLATE INITIALIZATION ---
 # ==========================================
 
-# Usage: make init-project name="My Awesome App" bundle="com.company.awesomeapp"
 init-project:
 	@if [ -z "$(name)" ] || [ -z "$(bundle)" ]; then \
 		echo "❌ Error: Provide both name and bundle. Example: make init-project name=\"App\" bundle=\"com.org.app\""; \
 		exit 1; \
 	fi
 	@echo "🚀 Initializing new project: $(name) ($(bundle))..."
-	@echo "Installing rename CLI..."
+	@echo "Activating rename CLI..."
 	dart pub global activate rename
 	@echo "Renaming App Name..."
-	dart pub global run rename --appname "$(name)"
+	dart pub global run rename setAppName --value "$(name)"
 	@echo "Renaming Bundle ID..."
-	dart pub global run rename --bundleId "$(bundle)"
+	dart pub global run rename setBundleId --value "$(bundle)"
 	@echo "Cleaning up..."
 	$(MAKE) clean-all
 	@echo "✅ Project successfully renamed! Run 'make setup' to generate files."

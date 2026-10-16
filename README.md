@@ -1,103 +1,117 @@
-# flutter-pro-core
+# 🚀 Flutter Multi-Package Enterprise Template (`flutter-pro-core`)
 
-# 🚀 Flutter Multi-Package Enterprise Template
-
-A production-ready Flutter template enforcing Clean Architecture, strict package isolation, and BLoC state management. Powered by Dart Workspaces and automated via a robust Makefile workflow.
-
-## 🚀 Getting Started (Using this Template)
-
-1. **Create your repository:** Click the green **"Use this template"** button on GitHub.
-2. **Clone your new repo:** `git clone https://github.com/Myrat204209/flutter-pro-core.git`
-3. **Initialize your brand:** Use the Makefile to rename the app and bundle ID in one command.
-
-   ```Bash
-   make init-project name="My Cool App" bundle="com.mycompany.coolapp"
-   ```
-4. **Update Visuals:**
-    * Replace `assets/icon/app_icon.png` with your 1024x1024 app icon.
-    * Replace `assets/splash/splash_logo.png` with your splash screen logo.
-    * Run the native generation command:
-    ```Bash
-    make gen-native-ui
-    ```
-
-5. **Generate Code & Run:**
-
-```Bash
-make setup
-flutter run
-```
-## 🏗️ Architecture Overview
-
-This project utilizes **Dart Workspaces** (Dart 3.5+) to manage a multi-package architecture. This enforces a strict separation of concerns. 
-
-The workspace is divided into the core app and three isolated packages:
-
-* **`lib/` (Main App):** The application layer. Contains all UI assembly, routing, and **all BLoC state management**. It depends on the packages below.
-* **`packages/app_ui/`:** The presentation layer. Contains the design system, generic widgets, and raw assets. **Cannot depend on `lib` or `data_provider`.**
-* **`packages/data_provider/`:** The data layer. Handles all external API calls, local storage, and data parsing. **Cannot depend on `lib` or `app_ui`.**
-* **`packages/form_inputs/`:** The validation layer. Contains reusable Formz input models. Completely independent.
+A production-ready Flutter starter template enforcing **Clean Architecture**, **strict package isolation**, **Formz validation**, and **BLoC state management**. Powered natively by **Dart Workspaces** (Dart 3.5+) and fully automated via a robust **Makefile workflow**.
 
 ---
 
-## 📂 Folder Structure & Responsibilities
+## ⚡ Quick Start
 
-### 1. The `app_ui` Package (Design System)
-All visual elements and raw assets live here.
-* **`assets/images/` & `assets/svgs/`:** Place your raw `.png`, `.jpg`, and `.svg` files here. Run `make gen-assets` to generate type-safe references via FlutterGen.
-* **`assets/fonts/`:** Place `.ttf` or `.otf` files here.
-* **`lib/src/colors/` & `lib/src/theme/`:** Define your `AppColors` and `ThemeData` here.
-* **`lib/src/widgets/`:** Pure, stateless, reusable UI components (e.g., `CustomPrimaryButton`, `StyledTextField`). No business logic allowed!
+### 1. Create & Clone Your Project
+Click **"Use this template"** on GitHub or clone directly:
+```bash
+git clone https://github.com/Myrat204209/flutter-pro-core.git my_app
+cd my_app
+```
 
-### 2. The `data_provider` Package (Data Layer)
-All communication with the outside world happens here.
-* **`lib/client/`:** Place your Retrofit API clients (`.dart` and `.g.dart`) here. 
-* **`lib/models/`:** Place your data models and Data Transfer Objects (DTOs) here. Use `json_serializable`. Put your API-specific `enums` here as well.
-* **`lib/api/`:** Interceptors, error handlers, and base HTTP configurations.
-* **`lib/storage/` & `lib/hive/`:** Local persistence logic (Hive boxes, secure storage).
-* *Note: Run `make build-data` to generate Retrofit and JSON Serializable files.*
+### 2. Rename Project & Bundle Identifier
+Use the built-in Makefile task to rename the app and bundle ID across Android and iOS in one step:
+```bash
+make init-project name="My Awesome App" bundle="com.mycompany.awesomeapp"
+```
 
-### 3. The `lib` Directory (Main App & Business Logic)
-This is where the app is assembled.
-* **BLoC / State Management:** All BLoCs, Events, and States live here. We strictly use `Equatable` sealed classes for Events and final classes for States.
-* **Features:** Grouped by feature (e.g., `lib/features/login/`). Each feature contains its specific UI screens and BLoCs.
+### 3. Update Visuals & Native Splash
+Replace placeholder branding files in `assets/`:
+* `assets/icon/app_icon.png` (1024x1024 app icon)
+* `assets/splash/splash_logo.png` (splash logo)
+
+Generate native launcher icons and splash screens:
+```bash
+make gen-native-ui
+```
+
+### 4. Setup Workspace & Run
+```bash
+make setup
+flutter run
+```
+
+---
+
+## 🏗️ Architecture & Package Isolation
+
+This monorepo uses native **Dart Workspaces** to enforce architectural boundaries and share dependencies via a single root `pubspec.lock`.
+
+```
+├── lib/                             # Application Layer (Orchestration, BLoC, Views)
+│   ├── app/                         # App widget, theme routing, localization
+│   ├── bootstrap.dart               # Startup pipeline, logging, error handling
+│   ├── di/                          # Service Locator (get_it)
+│   ├── features/                    # Feature-driven modules (e.g. login, home)
+│   └── main.dart                    # Application entrypoint
+│
+├── packages/
+│   ├── app_ui/                      # Presentation Layer (Design System)
+│   │   ├── assets/                  # Images, SVGs, and Fonts
+│   │   └── lib/src/                 # AppColors, AppTheme, AppTypography, Reusable Widgets
+│   │                                # (Cannot depend on data_provider or lib)
+│   │
+│   ├── data_provider/               # Data Layer (Networking, Persistence, DTOs)
+│   │   └── lib/src/                 # ApiClient (Dio + Talker), Models, TokenStorage, Repositories
+│   │                                # (Cannot depend on app_ui or lib)
+│   │
+│   └── form_inputs/                 # Validation Layer (Domain Form Inputs)
+│       └── lib/src/                 # Pure Dart Formz models (Email, Password)
+```
+
+### Dependency Flow Rules
+```
+┌────────────────────────────────────────────────────────┐
+│               lib/ (Application Layer)                 │
+│         BLoCs, Feature Views, Service Locator          │
+└────────────┬──────────────────┬──────────────────┬─────┘
+             │                  │                  │
+             ▼                  ▼                  ▼
+┌──────────────────────┐ ┌──────────────┐ ┌────────────────┐
+│  packages/app_ui     │ │ packages/    │ │ packages/      │
+│  Design System,      │ │ data_provider│ │ form_inputs    │
+│  Theme, UI Widgets   │ │ Dio, Storage │ │ Formz Models   │
+└──────────────────────┘ └──────────────┘ └────────────────┘
+```
+* **`app_ui`** is strictly isolated and never depends on `data_provider` or network logic.
+* **`data_provider`** handles data persistence, models, and HTTP clients without UI knowledge.
+* **`form_inputs`** contains pure validation rules without Flutter dependencies.
+* **`lib/`** depends on all three packages to assemble features.
 
 ---
 
 ## 🛠️ Developer Workflow (Makefile)
 
-We use a `Makefile` to eliminate repetitive command-line tasks. If you can't deploy it from a terminal, the workflow isn't finished!
-
-### ⚙️ Setup & Code Generation
-Run these commands when cloning the project, switching branches, or adding new assets/models.
-
 | Command | Description |
 | :--- | :--- |
-| `make setup` | **The Combo Command.** Runs all generation tasks across all packages. Use this when starting fresh. |
-| `make icons` | Generates icon fonts in `app_ui`. |
-| `make gen-assets` | Triggers FlutterGen in `app_ui` for type-safe images/SVGs. |
-| `make build-data` | Runs `build_runner` in `data_provider` (Retrofit, JSON serialization). |
-| `make build-root` | Runs `build_runner` in the root app (Routing, Envied). |
-
-### 🧹 Cleaning
-| Command | Description |
-| :--- | :--- |
-| `make clean` | Cleans the root project and gets pub packages. |
-| `make clean-all` | Deep cleans the root app, `app_ui`, and `data_provider`. |
-
-### 🌿 Git Workflow
-| Command | Description |
-| :--- | :--- |
-| `make new-branch b=name`| Creates a new branch `name`, checks it out, and pushes it to origin. |
-| `make sync-main` | Switches to `main` and pulls the latest changes. |
-
-### 🚀 Release Builds (CI/CD Ready)
-| Command | Description |
-| :--- | :--- |
-| `make build-android-apk` | Builds a release APK (obfuscated). |
-| `make build-android-aab` | Builds a release App Bundle for Google Play. |
-| `make build-ios-adhoc` | Builds an iOS IPA for Diawi/Firebase App Distribution. |
-| `make build-ios-appstore`| Builds an iOS IPA ready for Apple TestFlight/App Store. |
+| `make setup` | **The Master Setup.** Fetches all workspace dependencies and triggers code/asset generators. |
+| `make test` | Runs unit, widget, and architecture tests across root and all packages. |
+| `make analyze` | Runs static analysis across the entire workspace (`flutter analyze`). |
+| `make gen-native-ui` | Regenerates native Android & iOS app icons and splash screens. |
+| `make gen-assets` | Runs FlutterGen inside `app_ui` for type-safe SVG and image references. |
+| `make build-data` | Runs `build_runner` inside `data_provider` (Retrofit, Hive, JSON). |
+| `make clean` | Cleans root project artifacts and updates dependencies. |
+| `make clean-all` | Deep cleans build caches across root, `app_ui`, `data_provider`, and `form_inputs`. |
+| `make init-project` | Renames the application title and native bundle IDs using the modern `rename` CLI. |
+| `make build-android-apk` | Builds an obfuscated release APK with split debug symbols. |
+| `make build-android-aab` | Builds an obfuscated release Android App Bundle for Google Play. |
+| `make build-ios-adhoc` | Builds an iOS release IPA using Ad-Hoc export options. |
+| `make build-ios-appstore` | Builds an iOS release IPA ready for TestFlight / App Store submission. |
 
 ---
-*Built with strict Clean Architecture principles.*
+
+## 🧪 Testing & Verification
+
+Every layer contains dedicated tests:
+```bash
+# Run all workspace tests:
+make test
+```
+* **`packages/form_inputs`**: Validates pure input states, regex, and validation rules.
+* **`packages/app_ui`**: Verifies `AppTheme` Material 3 definitions, contrast, and `AppButton` tap interactions.
+* **`packages/data_provider`**: Verifies model JSON serialization, equality, and repository authentication handling.
+* **Root (`lib/`)**: Full widget integration tests validating view rendering, state emissions, and navigation.

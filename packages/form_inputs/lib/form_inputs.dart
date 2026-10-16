@@ -1,5 +1,7 @@
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+/// Reusable form inputs and validation models.
+library;
+
+export 'package:formz/formz.dart';
+
+export 'src/email.dart';
+export 'src/password.dart';

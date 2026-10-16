@@ -1,5 +1,7 @@
 name: data_provider
-description: "A package which handle 3rd layer data from out."
+description: "Data layer handling API clients, storage, and models."
+version: 0.1.0
+publish_to: none
 resolution: workspace
 
 environment:
